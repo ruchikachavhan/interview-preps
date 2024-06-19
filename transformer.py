@@ -50,6 +50,19 @@ class MultiHeadAttention(torch.nn.Module):
         y = y.view(-1, self.n_heads * self.head_dim) @ self.W_o
         return y
 
+class TransformerBlock(torch.nn.Module):
+    def __init__(self, dim, n_heads):
+        super(TransformerBlock, self).__init__()
+        self.attention = MultiHeadAttention(dim, n_heads)
+        self.layer_norm1 = torch.nn.LayerNorm(dim)
+        self.layer_norm2 = torch.nn.LayerNorm(dim)
+        self.linear = torch.nn.Linear(dim, dim)
+    
+    def forward(self, x):
+        y = self.attention(x)
+        x = self.layer_norm1(x + y)
+        y = self.linear(x)
+        return self.layer_norm2(x + y)
 
 def main():
     x = torch.rand(10, 5)
